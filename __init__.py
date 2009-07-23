@@ -1,4 +1,4 @@
-'''integration with Review Board'''
+'''post changesets to a reviewboard server'''
 
 import os, errno, re
 import cStringIO
@@ -127,20 +127,18 @@ this is not the case.
             raise util.Abort(_('no repositories configured at %s' % server))
 
         ui.status('Repositories:\n')
-        repo_ids = set()
+        repo_choice = []
         for r in repositories:
             ui.status('[%s] %s\n' % (r['id'], r['name']) )
-            repo_ids.add(str(r['id']))
+            repo_choice.append('&'+str(r['id']))
         if len(repositories) > 1:
-            repo_id = ui.prompt('repository id:', 0)
-            if not repo_id in repo_ids:
-                raise util.Abort(_('invalid repository ID: %s') % repo_id)
+            repo_id = ui.prompt('repository id:', repo_choice, 0)
         else:
             repo_id = repositories[0]['id']
             ui.status('repository id: %s\n' % repo_id)
 
         try:
-            request_id = reviewboard.new_request(repo_id, fields, diff, parentdiff)
+            request_id = reviewboard.new_request(repo_id, fields)
             if opts.get('publish'):
                 reviewboard.publish(request_id)
         except ReviewBoardError, msg:
