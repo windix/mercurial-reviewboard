@@ -2,7 +2,7 @@
 
 import os, errno, re
 import cStringIO
-from mercurial import cmdutil, hg, ui, mdiff, patch, util
+from mercurial import cmdutil, hg, ui, mdiff, patch, util, node
 from mercurial.i18n import _
 
 from reviewboard import make_rbclient, ReviewBoardError
@@ -39,6 +39,10 @@ the --longdiff option above.
 The --outgoing option recognizes the path entries 'reviewboard', 'default-push'
 and 'default' in this order of precedence. 'reviewboard' may be used if the
 repository accessible to Review Board is not the upstream repository.
+
+The --git option causes postreview to generate diffs in Git extended format,
+which includes information about file renames and copies. ReviewBoard 1.6 beta
+2 or later is required in order to use this feature.
 '''
 
     server = opts.get('server')
@@ -61,10 +65,16 @@ repository accessible to Review Board is not the upstream repository.
     else:
         proxy=None
 
-    def getdiff(ui, repo, r, parent):
+    def getdiff(ui, repo, r, parent, opts):
         '''return diff for the specified revision'''
         output = ""
-        for chunk in patch.diff(repo, parent.node(), r.node()):
+        if opts.get('git'):
+            # Git diffs don't include the revision numbers with each file, so
+            # we have to put them in the header instead.
+            output += "# Node ID " + node.hex(r.node()) + "\n"
+            output += "# Parent  " + node.hex(parent.node()) + "\n"
+        diffopts = patch.diffopts(ui, opts)
+        for chunk in patch.diff(repo, parent.node(), r.node(), opts=diffopts):
             output += chunk
         return output
 
@@ -114,12 +124,12 @@ repository accessible to Review Board is not the upstream repository.
         fields['description']   = c.description()
         fields['branch']        = c.branch()
 
-    diff = getdiff(ui, repo, c, parent)
+    diff = getdiff(ui, repo, c, parent, opts)
     ui.debug('\n=== Diff from parent to rev ===\n')
     ui.debug(diff + '\n')
 
     if rparent and parent != rparent:
-        parentdiff = getdiff(ui, repo, parent, rparent)
+        parentdiff = getdiff(ui, repo, parent, rparent, opts)
         ui.debug('\n=== Diff from rparent to parent ===\n')
         ui.debug(parentdiff + '\n')
     else:
@@ -247,6 +257,8 @@ cmdtable = {
         ('m', 'master', '',
          _('use specified revision as the parent diff base')),
         ('', 'server', '', _('ReviewBoard server URL')),
+        ('g', 'git', False,
+         _('use git extended diff format (enables rename/copy support)')),
         ('e', 'existing', '', _('existing request ID to update')),
         ('u', 'update', False, _('update the fields of an existing request')),
         ('p', 'publish', None, _('publish request immediately')),
