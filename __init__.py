@@ -196,6 +196,10 @@ repository accessible to Review Board is not the upstream repository.
         msg = 'review request published: %s\n'
     ui.status(msg % request_url)
 
+    if opts.get('webbrowser') or \
+        ui.configbool('reviewboard', 'launch_webbrowser'):
+        launch_browser(ui, request_url)
+
 def remoteparent(ui, repo, rev, upstream=None):
     if upstream:
         remotepath = ui.expandpath(upstream)
@@ -215,6 +219,18 @@ def remoteparent(ui, repo, rev, upstream=None):
         a, b, c = repo.changelog.nodesbetween([orev.node()], [repo[rev].node()])
         if a:
             return orev.parents()[0]
+
+def launch_browser(ui, request_url):
+    # not all python installations have the webbrowser module
+    from mercurial import demandimport
+    demandimport.disable()
+    try:
+        import webbrowser
+        webbrowser.open(request_url)
+    except:
+        ui.status('unable to launch browser - webbrowser module not available.')
+    finally:
+        demandimport.enable()
 
 cmdtable = {
     "postreview":
@@ -237,6 +253,7 @@ cmdtable = {
          _('review all changes since last upstream sync')),
         ('U', 'target_people', [], _('comma separated list of people needed to review the code')),
         ('G', 'target_groups', [], _('comma separated list of groups needed to review the code')),
+        ('w', 'webbrowser', False, _('launch browser to show review')),
         ('', 'username', '', _('username for the ReviewBoard site')),
         ('', 'password', '', _('password for the ReviewBoard site')),
         ('', 'apiver', '', _('ReviewBoard API version (e.g. 1.0, 2.0)')),
