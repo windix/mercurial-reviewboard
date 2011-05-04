@@ -304,10 +304,11 @@ class Api20Client(ApiClient):
         self._requestcache[req['id']] = req
         return req['id']
 
-    def update_request(self, id, fields={}, diff='', parentdiff=''):
+    def update_request(self, id, fields={}, diff='', parentdiff='', publish=True):
         req = self._get_request(id)
         self._set_request_details(req, fields, diff, parentdiff)
-        self.publish(id)
+        if publish:
+            self.publish(id)
 
     def publish(self, id):
         req = self._get_request(id)
@@ -396,7 +397,7 @@ class Api10Client(ApiClient):
 
         return id
 
-    def update_request(self, id, fields={}, diff='', parentdiff=''):
+    def update_request(self, id, fields={}, diff='', parentdiff='', publish=True):
         request_id = None
         for r in self.requests():
             if r['id'] == int(id):

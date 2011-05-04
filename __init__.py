@@ -151,7 +151,9 @@ repository accessible to Review Board is not the upstream repository.
 
     if request_id:
         try:
-            reviewboard.update_request(request_id, fields, diff, parentdiff)
+            reviewboard.update_request(request_id, fields=fields, diff=diff,
+                parentdiff=parentdiff, publish=opts.get('publish') or
+                    not ui.configbool('reviewboard', 'explicit_publish_update'))
         except ReviewBoardError, msg:
             raise util.Abort(_(str(msg)))
     else:
