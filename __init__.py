@@ -241,8 +241,8 @@ def launch_browser(ui, request_url):
         webbrowser.open(request_url)
     except:
         ui.status('unable to launch browser - webbrowser module not available.')
-    finally:
-        demandimport.enable()
+
+    demandimport.enable()
 
 cmdtable = {
     "postreview":
