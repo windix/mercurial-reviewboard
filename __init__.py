@@ -124,6 +124,9 @@ which includes information about file renames and copies. ReviewBoard 1.6 beta
         fields['description']   = c.description()
         fields['branch']        = c.branch()
 
+    if opts.get('summary'):
+        fields['summary'] = opts.get('summary')
+
     diff = getdiff(ui, repo, c, parent, opts)
     ui.debug('\n=== Diff from parent to rev ===\n')
     ui.debug(diff + '\n')
@@ -265,6 +268,7 @@ cmdtable = {
         ('', 'parent', '', _('parent revision for the uploaded diff')),
         ('l','longdiff', False,
          _('review all changes since last upstream sync')),
+        ('s', 'summary', '', _('summary for the review request')),
         ('U', 'target_people', [], _('comma separated list of people needed to review the code')),
         ('G', 'target_groups', [], _('comma separated list of groups needed to review the code')),
         ('w', 'webbrowser', False, _('launch browser to show review')),
