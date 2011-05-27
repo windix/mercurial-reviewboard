@@ -251,7 +251,7 @@ class HttpClient:
             content += "--" + BOUNDARY + "\r\n"
             content += "Content-Disposition: form-data; name=\"%s\"\r\n" % key
             content += "\r\n"
-            content += fields[key] + "\r\n"
+            content += str(fields[key]) + "\r\n"
 
         for key in files:
             filename = files[key]['filename']
