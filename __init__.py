@@ -43,6 +43,35 @@ repository accessible to Review Board is not the upstream repository.
 The --git option causes postreview to generate diffs in Git extended format,
 which includes information about file renames and copies. ReviewBoard 1.6 beta
 2 or later is required in order to use this feature.
+
+The reviewboard extension may be configured by adding a [reviewboard] section
+to your .hgrc or mercurial.ini file, or to the .hg/hgrc file of an individual
+repository. The following options are available::
+
+  [reviewboard]
+
+  # REQUIRED
+  server = <server_url>             # The URL of your ReviewBoard server
+
+  # OPTIONAL
+  http_proxy = <proxy_url>          # HTTP proxy to use for the connection
+  user = <rb_username>              # Username to use for ReviewBoard
+                                    # connections
+  password = <rb_password>          # Password to use for ReviewBoard
+                                    # connections
+  repoid = <repoid>                 # ReviewBoard repository ID (normally only
+                                    # useful in a repository-specific hgrc)
+  target_groups = <groups>          # Default groups for new review requests
+                                    # (comma-separated list)
+  target_people = <users>           # Default users for new review requests
+                                    # (comma-separated list)
+  explicit_publish_update = <bool>  # If True, updates posted using the -e
+                                    # option will not be published immediately
+                                    # unless the -p option is also used
+  launch_webbrowser = <bool>        # If True, new or updated requests will
+                                    # always be shown in a web browser after
+                                    # posting.
+
 '''
 
     server = opts.get('server')
