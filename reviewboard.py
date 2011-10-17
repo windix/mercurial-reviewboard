@@ -23,7 +23,7 @@ class ReviewBoardError(Exception):
             try:
                 json = simplejson.loads(json)
             except:
-                self.msg = json
+                self.msg = "Unknown error - non-JSON response"
                 return
 
         if json:

@@ -149,12 +149,12 @@ repository. The following options are available::
     # Don't clobber the summary and description for an existing request
     # unless specifically asked for    
     if opts.get('update') or not request_id:
-        fields['summary']       = c.description().splitlines()[0]
-        fields['description']   = c.description()
-        fields['branch']        = c.branch()
+        fields['summary']       = toascii(c.description().splitlines()[0])
+        fields['description']   = toascii(c.description())
+        fields['branch']        = toascii(c.branch())
 
     if opts.get('summary'):
-        fields['summary'] = opts.get('summary')
+        fields['summary'] = toascii(opts.get('summary'))
 
     diff = getdiff(ui, repo, c, parent, opts)
     ui.debug('\n=== Diff from parent to rev ===\n')
@@ -173,7 +173,7 @@ repository. The following options are available::
         else:
             value = ui.config('reviewboard', field)
         if value:
-            fields[field] = value
+            fields[field] = toascii(value)
 
     ui.status('changeset:\t%s:%s "%s"\n' % (rev, c, c.description()) )
     ui.status('reviewboard:\t%s\n' % server)
@@ -285,6 +285,13 @@ def launch_browser(ui, request_url):
         ui.status('unable to launch browser - webbrowser module not available.')
 
     demandimport.enable()
+
+def toascii(s):
+    for i in xrange(len(s)):
+        if ord(s[i]) >= 128:
+            s = s[:i] + '?' + s[i+1:]
+
+    return s
 
 cmdtable = {
     "postreview":
