@@ -219,7 +219,7 @@ class HttpClient:
             if not hasattr(e, 'code'):
                 raise
             if e.code >= 400:
-                raise ReviewBoardError(e.read())
+                raise
             else:
                 return ""
         except urllib2.HTTPError, e:
