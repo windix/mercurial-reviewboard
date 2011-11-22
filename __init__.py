@@ -145,12 +145,13 @@ repository. The following options are available::
     fields = {}
 
     c = repo.changectx(rev)
+    changesets_string = get_changesets_string(repo, parent, c)
 
     # Don't clobber the summary and description for an existing request
     # unless specifically asked for    
     if opts.get('update') or not request_id:
         fields['summary']       = toascii(c.description().splitlines()[0])
-        fields['description']   = toascii(c.description())
+        fields['description']   = toascii(changesets_string)
         fields['branch']        = toascii(c.branch())
 
     if opts.get('summary'):
@@ -175,7 +176,7 @@ repository. The following options are available::
         if value:
             fields[field] = toascii(value)
 
-    ui.status('changeset:\t%s:%s "%s"\n' % (rev, c, c.description()) )
+    ui.status('\n%s\n' % changesets_string)
     ui.status('reviewboard:\t%s\n' % server)
     ui.status('\n')
     username = opts.get('username') or ui.config('reviewboard', 'user')
@@ -292,6 +293,28 @@ def toascii(s):
             s = s[:i] + '?' + s[i+1:]
 
     return s
+
+def get_changesets_string(repo, parentctx, ctx):
+    """Build a summary from all changesets included in this review."""
+    contexts = []
+    for node in repo.changelog.nodesbetween([parentctx.node()],[ctx.node()])[0]:
+        currctx = repo[node]
+        if node == parentctx.node():
+            continue
+            
+        contexts.append(currctx)
+
+    if len(contexts) == 0:
+        contexts.append(ctx)
+
+    contexts.reverse()
+
+    changesets_string = '* * *\n\n'.join(
+                ['Changeset %s:%s\n---------------------------\n%s\n' %
+                (ctx.rev(), ctx, ctx.description())
+                for ctx in contexts])
+
+    return changesets_string
 
 cmdtable = {
     "postreview":
