@@ -97,7 +97,7 @@ repository. The following options are available::
     def getdiff(ui, repo, r, parent, opts):
         '''return diff for the specified revision'''
         output = ""
-        if opts.get('git'):
+        if opts.get('git') or ui.configbool('diff', 'git'):
             # Git diffs don't include the revision numbers with each file, so
             # we have to put them in the header instead.
             output += "# Node ID " + node.hex(r.node()) + "\n"
