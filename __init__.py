@@ -269,6 +269,9 @@ def findoutgoing(repo, remoterepo):
         return repo.findoutgoing(remoterepo)
 
     try:
+        if util.version().startswith('2.1'):
+            outgoing = discovery.findcommonoutgoing(repo, remoterepo)
+            return outgoing.missing
         common, outheads = discovery.findcommonoutgoing(repo, remoterepo)
         return repo.changelog.findmissing(common=common, heads=outheads)
     except AttributeError:
